@@ -12,8 +12,8 @@ to the simple beanstalk-queue and I figured 'Lets think of an excuse to implemen
 Thus the MD5 bruteforce hash-cracker was born. 
 
 To use this, you need to download 3 projects in total: 
-- BeanstalkManagerMD5 (This project) 
-- BeanstalkWorkerDecodeMD5
+- BeanstalkManagerMD5 
+- BeanstalkWorkerDecodeMD5 (This project) 
 - BeanstalkWorkerResult
 - webservice database installation and webconsole. 
 
