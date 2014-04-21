@@ -25,3 +25,23 @@ for each element in the range it will create the md5, compare it to the given ha
 in the result job. 
 
 So the decoder-worker also creates a beanstalk job, but in the 'result' queue. 
+
+
+HOWTO build and use it: 
+Build it: 
+- Add a reference to beanstemc.jar and json-simple-1.1.1.jar to the project. 
+- Build it into a jar file. 
+
+Start it: 
+- execute: java -jar BeanstalkWorkerDecodeMD5.jar <host> <port> <tube>
+
+Host port and tube are all settings for the beanstalk daemon. 
+By default the host is localhost, the port is 9000 and the tube is 'longtube'. As you can see in the README.md of the manager, the only tube
+currently supported is 'longtube'. 
+
+TODO: 
+- cleanup the debug information. 
+- implement feedback about status of the worker to the server. (the database already has a table for this, but the listener has not yet been implemented). 
+- implement a measure of control over the beanstalk. 
+
+
