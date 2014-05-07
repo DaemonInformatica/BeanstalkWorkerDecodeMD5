@@ -233,6 +233,8 @@ public class BeanstalkWorkerDecodeMD5
     
     public void runWorker(int port, String tubename)
     {
+        m_beanStalkPort = port;
+        
         System.out.println("Starting worker on tube: " + tubename);
         try
         {

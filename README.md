@@ -43,5 +43,5 @@ TODO:
 - cleanup the debug information. 
 - implement feedback about status of the worker to the server. (the database already has a table for this, but the listener has not yet been implemented). 
 - implement a measure of control over the beanstalk. 
-
-
+- Fix an out of memory Error that comes up after running the client a while... 
+- Fix the uber-ugly again and again re-connecting of beanstalk. It's a stateful connection for chrissake! 
