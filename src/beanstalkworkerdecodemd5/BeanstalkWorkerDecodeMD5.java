@@ -22,14 +22,26 @@ import org.json.simple.JSONValue;
  */
 public class BeanstalkWorkerDecodeMD5 
 {
-    private String  m_host;
-    private boolean m_bRun;
-    private int     m_beanStalkPort;
+    private String      m_host;
+    private boolean     m_bRun;
+    private int         m_beanStalkPort;
+    private Beanstemc   m_beanstem;
     
-    public BeanstalkWorkerDecodeMD5(String host)
+    public BeanstalkWorkerDecodeMD5(String host, int port)
     {
-        m_host = host;
-        m_bRun = true;
+        // System.out.println("Host: " + host + " - port: " + port);
+        m_host          = host;
+        m_bRun          = true;
+        m_beanStalkPort = port;
+        
+        try
+        {
+            m_beanstem = new Beanstemc(host, m_beanStalkPort);
+        }
+        catch(UnknownHostException uhE) { System.err.println("Unknown host."); } 
+        catch(IOException ioE)          { System.err.println("IOException: " + ioE.toString()); } 
+        // catch(BeanstemcException bsE)   { System.err.println("Beanstalk Exception: " + bsE.toString()); } 
+
     }
 
     public String calcMD5(String plaintext)
@@ -81,13 +93,10 @@ public class BeanstalkWorkerDecodeMD5
             String code = o.toJSONString();
             byte ba[]   = stringToByteArr(code);
 
-            // fire job to the result queue. 
-            Beanstemc stem = new Beanstemc("localhost", 9000);
-
-            stem.use("result");
-            stem.put(ba);
+            // fire job to the result queue.         
+            m_beanstem.use("result");
+            m_beanstem.put(ba);
         }
-        catch(UnknownHostException uhE) { System.err.println("Unknown host."); } 
         catch(IOException ioE)          { System.err.println("IOException: " + ioE.toString()); } 
         catch(BeanstemcException bsE)   { System.err.println("Beanstalk Exception: " + bsE.toString()); } 
     }
@@ -154,16 +163,11 @@ public class BeanstalkWorkerDecodeMD5
         try
         {
             // fire job to the result queue. 
-            Beanstemc stem = new Beanstemc("localhost", 9000);
-
-            stem.use("result");
-            stem.put(ba);
+            m_beanstem.use("result");
+            m_beanstem.put(ba);
         }
-        catch(UnknownHostException uhE) { System.err.println("Unknown host."); } 
         catch(IOException ioE)          { System.err.println("IOException: " + ioE.toString()); } 
         catch(BeanstemcException bsE)   { System.err.println("Beanstalk Exception: " + bsE.toString()); } 
-
-        
     }
     
     public String runJob(Job j)
@@ -238,27 +242,24 @@ public class BeanstalkWorkerDecodeMD5
         System.out.println("Starting worker on tube: " + tubename);
         try
         {
-            // Initialise beanstem
-            Beanstemc stem = new Beanstemc(m_host, port);
-
             // watch correct tube. 
-            stem.watch(tubename);
+            m_beanstem.watch(tubename);
 
             while(m_bRun)
             {
                 System.out.println("while loop.");
+                
                 // for each job: Execute 'runJob'. 
-                Job j = stem.reserve();
-                stem.delete(j);
-                int nID         = getDBIDFromJob(j);
+                Job j = m_beanstem.reserve();
+                m_beanstem.delete(j);
+                int nID = getDBIDFromJob(j);
                 setProcessing(nID);
-                String  result  = runJob(j);
+                String result = runJob(j);
                 
                 
                 returnResult(nID, result);
             }
         }
-        catch(UnknownHostException uhE) { System.err.println("Unknown host!"); }
         catch(IOException uhE)          { System.err.println("Oh noes! IOException!"); }
         catch(BeanstemcException bsE)   { System.err.println("Beanstem keeled over!"); }
     }
@@ -276,7 +277,7 @@ public class BeanstalkWorkerDecodeMD5
         String host                     = "localhost";
         int port                        = 9000;
         String tube                     = "longtube";
-        BeanstalkWorkerDecodeMD5 app    = new BeanstalkWorkerDecodeMD5(host);
+        BeanstalkWorkerDecodeMD5 app    = new BeanstalkWorkerDecodeMD5(host, port);
 
         // TODO code application logic here
         if(args.length < 3)
@@ -290,7 +291,7 @@ public class BeanstalkWorkerDecodeMD5
             host    = args[0];
             port    = Integer.valueOf(args[1]);
             tube    = args[2];
-            app     = new BeanstalkWorkerDecodeMD5(host);
+            app     = new BeanstalkWorkerDecodeMD5(host, port);
         }
         
         app.runWorker(port, tube);
